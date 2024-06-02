@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "./Home.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHtml5,
@@ -9,6 +8,7 @@ import {
   faPython,
   faJava,
 } from "@fortawesome/free-brands-svg-icons";
+import "./Home.scss";
 
 const languagesData = [
   { name: "HTML", category: "Frontend", icon: faHtml5 },
@@ -20,12 +20,14 @@ const languagesData = [
   { name: "C++", category: "General", icon: faPython },
   { name: "Java", category: "General", icon: faJava },
 ];
+
 const Home = ({ isMenuOpen }) => {
   const [scrollY, setScrollY] = useState(0);
   const [containerStyle, setContainerStyle] = useState({
     marginLeft: isMenuOpen ? "20rem" : "20px",
     width: isMenuOpen ? "calc(100% - 20rem)" : "calc(100% - 20px)",
-    transition: "margin-left 0.3s ease, width 0.3s ease",
+    transition:
+      "margin-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), width 0.3s cubic-bezier(0.25, 0.8, 0.25, 1)",
   });
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -44,7 +46,13 @@ const Home = ({ isMenuOpen }) => {
   useEffect(() => {
     const newWidth = isMenuOpen ? "calc(100% - 15rem)" : "calc(100% - 80px)";
     const newMargin = isMenuOpen ? "15rem" : "80px";
-    setContainerStyle({ width: newWidth, marginLeft: newMargin });
+    setContainerStyle({
+      width: newWidth,
+      marginLeft: newMargin,
+      transition: isMenuOpen
+        ? "margin-left 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), width 0.5s cubic-bezier(0.25, 0.1, 0.25, 1)"
+        : "margin-left 0.25s cubic-bezier(0.25, 0.8, 0.25, 1), width 0.25s cubic-bezier(0.25, 0.8, 0.25, 1)",
+    });
   }, [isMenuOpen]);
 
   const handleCategorySelect = (category) => {
@@ -59,44 +67,48 @@ const Home = ({ isMenuOpen }) => {
         );
 
   return (
-    <div className="" style={containerStyle}>
+    <div
+      className="relative transition-all duration-300 ease-in-out bg-gray-800"
+      style={containerStyle}
+    >
       <div
-        className="scroll-indicator"
+        className="scroll-indicator fixed top-0 left-0 bg-blue-500"
         style={{
           height: `${
             (scrollY /
               (document.documentElement.scrollHeight - window.innerHeight)) *
             100
           }%`,
+          width: "4px",
         }}
       ></div>
       <div className="content">
         <section
-          className="intro h-screen flex  bg-gray-900"
+          className="intro h-screen flex bg-gray-900"
           style={{
             backgroundPositionY: -scrollY * 0.5 + "px",
           }}
         >
-          <div className="flex  sm:px-20  justify-end">
+          <div className="flex sm:px-20 justify-end w-full">
             <div className="flex my-auto ">
               <img
                 src="../src/assets/avatar.avif"
                 alt="Suraj Adhikari"
-                className="mt-8 rounded-full"
+                className="mt-8 rounded-full w-32 h-32 object-cover"
               />
             </div>
             <div className="my-auto mx-10 flex flex-col text-gray-400">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4 ">
-                <span className="bg-gradient-to-r from-indigo-500 to-blue-500 text-transparent bg-clip-text  py-1 rounded">
+              <h1 className="text-4xl md:text-6xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-indigo-500 to-blue-500 text-transparent bg-clip-text py-1 rounded">
                   Sup!
                 </span>
                 My Name is
                 <br />
-                <span className="bg-gradient-to-r from-indigo-500 via-pink-500 to-purple-500 text-transparent bg-clip-text  py-1 rounded">
+                <span className="bg-gradient-to-r from-indigo-500 via-pink-500 to-purple-500 text-transparent bg-clip-text py-1 rounded">
                   Suraj Adhikari
                 </span>
               </h1>
-              <p className="text-lg md:text-3xl  text-gray-600">
+              <p className="text-lg md:text-3xl text-gray-600">
                 I am a developer
               </p>
             </div>
@@ -116,7 +128,7 @@ const Home = ({ isMenuOpen }) => {
                 key={index}
                 className={`px-4 py-2 mx-2 bg-gray-900 text-white rounded ${
                   selectedCategory === category ? "bg-blue-500" : ""
-                }`}
+                } transition-all duration-300`}
                 onClick={() => handleCategorySelect(category)}
               >
                 {category}
@@ -129,9 +141,9 @@ const Home = ({ isMenuOpen }) => {
                 <FontAwesomeIcon
                   icon={language.icon}
                   size="3x"
-                  className="mr-2"
+                  className="mr-2 text-blue-500"
                 />
-                <span>{language.name}</span>
+                <span className="text-lg">{language.name}</span>
               </div>
             ))}
           </div>
@@ -146,31 +158,31 @@ const Home = ({ isMenuOpen }) => {
           <div className="text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Projects</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 border border-gray-400 rounded">
+              <div className="p-4 border border-gray-400 rounded transition-transform transform hover:scale-105 duration-300">
                 <h3 className="text-xl font-semibold mb-2">Project 1</h3>
                 <p className="text-gray-300">Description of Project 1</p>
                 <img
                   src="https://via.placeholder.com/400"
                   alt="Project 1"
-                  className="mt-4"
+                  className="mt-4 rounded"
                 />
               </div>
-              <div className="p-4 border border-gray-400 rounded">
+              <div className="p-4 border border-gray-400 rounded transition-transform transform hover:scale-105 duration-300">
                 <h3 className="text-xl font-semibold mb-2">Project 2</h3>
                 <p className="text-gray-300">Description of Project 2</p>
                 <img
                   src="https://via.placeholder.com/400"
                   alt="Project 2"
-                  className="mt-4"
+                  className="mt-4 rounded"
                 />
               </div>
-              <div className="p-4 border border-gray-400 rounded">
+              <div className="p-4 border border-gray-400 rounded transition-transform transform hover:scale-105 duration-300">
                 <h3 className="text-xl font-semibold mb-2">Project 3</h3>
                 <p className="text-gray-300">Description of Project 3</p>
                 <img
                   src="https://via.placeholder.com/400"
                   alt="Project 3"
-                  className="mt-4"
+                  className="mt-4 rounded"
                 />
               </div>
             </div>
@@ -187,14 +199,6 @@ const Home = ({ isMenuOpen }) => {
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Contact Me</h2>
             <p className="text-xl md:text-2xl">Email: example@example.com</p>
             <p className="text-xl md:text-2xl">Phone: +1234567890</p>
-            <p className="text-xl md:text-2xl">
-              LinkedIn: linkedin.com/[username]
-            </p>
-            <img
-              src="https://via.placeholder.com/400"
-              alt="Contact Me"
-              className="mt-8"
-            />
           </div>
         </section>
       </div>

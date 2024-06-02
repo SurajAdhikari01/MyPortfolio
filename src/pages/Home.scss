@@ -1,10 +1,8 @@
-
-  .scroll-indicator {
-    position: fixed;
-    top: 0;
-    right: 20px; /* Adjust as needed */
-    width: 2px; /* Adjust as needed */
-    background-color: #b3e0ff; /* Light blue color */
-    z-index: 1000;
-  }
-  
+.scroll-indicator {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 4px;
+  background-color: #3b82f6;
+  z-index: 50;
+}

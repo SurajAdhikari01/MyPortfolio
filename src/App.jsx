@@ -10,7 +10,7 @@ import Home from "./pages/Home";
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
-    <div className="App">
+    <div className="App bg-gray-800">
       <Router>
         <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
         <Routes>
