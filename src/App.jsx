@@ -9,8 +9,9 @@ import Home from "./pages/Home";
 
 function App() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
-    <div className="App bg-gray-800">
+    <div className="App bg-gray-900">
       <Router>
         <Navbar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
         <Routes>
