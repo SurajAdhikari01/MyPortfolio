@@ -342,15 +342,18 @@ const Home = ({ isMenuOpen }) => {
                   },
                   {
                     icon: faLinkedin,
-                    link: "https://linkedin.com/in/yourusername",
+                    link: "https://www.linkedin.com/in/suraj-adhikari-041667240/",
                   },
-                  { icon: faTwitter, link: "https://twitter.com/yourusername" },
+                  { icon: faTwitter, link: "https://twitter.com/savvyaye" },
                   { icon: faMedium, link: "https://medium.com/@yourusername" },
                   {
                     icon: faStackOverflow,
                     link: "https://stackoverflow.com/users/youruserid",
                   },
-                  { icon: faEnvelope, link: "mailto:your.email@example.com" },
+                  {
+                    icon: faEnvelope,
+                    link: "mailto:surajadhikari01+portfolio@icolud.com",
+                  },
                 ].map((item, index) => (
                   <a
                     key={index}

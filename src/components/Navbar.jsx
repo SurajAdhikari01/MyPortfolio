@@ -68,11 +68,19 @@ function Navbar({ isMenuOpen, setIsMenuOpen }) {
   };
 
   const socialLinks = [
-    { href: "https://www.linkedin.com/", icon: faLinkedin, text: "LinkedIn" },
-    { href: "https://github.com/", icon: faGithub, text: "GitHub" },
-    { href: "https://twitter.com/", icon: faTwitter, text: "Twitter" },
     {
-      href: "https://www.instagram.com/",
+      href: "https://www.linkedin.com/in/suraj-adhikari-041667240/",
+      icon: faLinkedin,
+      text: "LinkedIn",
+    },
+    {
+      href: "https://github.com/surajadhikari01",
+      icon: faGithub,
+      text: "GitHub",
+    },
+    { href: "https://twitter.com/savvyaye", icon: faTwitter, text: "Twitter" },
+    {
+      href: "https://www.instagram.com/xdzc0",
       icon: faInstagram,
       text: "Instagram",
     },
