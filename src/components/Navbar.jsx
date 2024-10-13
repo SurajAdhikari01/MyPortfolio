@@ -138,11 +138,40 @@ function Navbar({ isMenuOpen, setIsMenuOpen }) {
       )}
     </motion.div>
   );
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        // Enable scrolling on larger screens
+        document.body.style.overflow = "unset";
+      } else {
+        // Disable scrolling on mobile if menu is open
+        document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
+      }
+    };
+
+    // Initial check
+    handleResize();
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.body.style.overflow = "unset"; // Reset on component unmount
+    };
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
+    }
+  }, [isMenuOpen]);
 
   return (
     <nav
-      className={`fixed flex flex-col top-0 left-0 z-50 h-full bg-gray-900 text-white transition-all duration-300 
-      ${isMenuOpen ? "w-[15rem]" : "w-20"}`}
+      className={`fixed flex flex-col top-0 left-0 z-50 h-full bg-gray-900 text-white overflow-hidden transition-all duration-300 
+      ${isMenuOpen ? "md:w-[15rem] w-full " : "w-20"}`}
     >
       <div className="mx-auto my-8 h-screen flex flex-col justify-between">
         <div>

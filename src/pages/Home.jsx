@@ -291,12 +291,14 @@ const Home = ({ isMenuOpen }) => {
 
   return (
     <motion.div
-      className={`${theme === "dark" ? "bg-gray-900" : "bg-gray-100"} text-${
+      className={`${
+        theme === "dark" ? "bg-gray-900" : "bg-gray-100"
+      } overflow-hidden text-${
         theme === "dark" ? "white" : "gray-900"
       } min-h-screen relative`}
       initial={false}
       animate={{
-        marginLeft: isMenuOpen ? "16rem" : "5rem",
+        marginLeft: isMenuOpen ? "16rem " : "5rem",
         width: isMenuOpen ? "calc(100% - 16rem)" : "calc(100% - 5rem)",
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -583,7 +585,7 @@ const Home = ({ isMenuOpen }) => {
         </div>
       </motion.section>
 
-      <motion.section
+      {/* {<motion.section
         className="container mx-auto py-20 px-4"
         variants={containerVariants}
         initial="hidden"
@@ -608,7 +610,7 @@ ignore this i will fill this later on
             `}
           />
         </div>
-      </motion.section>
+      </motion.section>} */}
 
       <footer className="bg-gray-900 py-8">
         <div className="container mx-auto px-4">
