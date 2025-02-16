@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,17 +14,48 @@ import {
   faEnvelope,
   faBriefcase,
   faUser,
+  faCode,
 } from "@fortawesome/free-solid-svg-icons";
+
+// Move static data outside the component
+const socialLinks = [
+  {
+    href: "https://www.linkedin.com/in/suraj-adhikari-041667240/",
+    icon: faLinkedin,
+    text: "LinkedIn",
+  },
+  {
+    href: "https://github.com/surajadhikari01",
+    icon: faGithub,
+    text: "GitHub",
+  },
+  { href: "https://twitter.com/savvyaye", icon: faTwitter, text: "Twitter" },
+  {
+    href: "https://www.instagram.com/xdzc0",
+    icon: faInstagram,
+    text: "Instagram",
+  },
+];
+
+const sectionIcons = {
+  home: faHome,
+  about: faUser,
+  skills: faLaptopCode,
+  projects: faBriefcase,
+  contact: faEnvelope,
+};
 
 function Navbar({ isMenuOpen, setIsMenuOpen }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [scrollPosition, setScrollPosition] = useState(0);
   const [activeSection, setActiveSection] = useState("");
 
+  // Handle scroll and intersection observer in a single effect
   useEffect(() => {
     const handleScroll = () => {
-      setScrollPosition(window.scrollY);
-      setIsScrolled(window.scrollY > 50);
+      const currentScrollY = window.scrollY;
+      setScrollPosition(currentScrollY);
+      setIsScrolled(currentScrollY > 50);
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -52,46 +83,16 @@ function Navbar({ isMenuOpen, setIsMenuOpen }) {
     };
   }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+  }, [setIsMenuOpen]);
 
-  const closeMenu = () => {
+  const closeMenu = useCallback(() => {
     setIsMenuOpen(false);
-  };
+  }, [setIsMenuOpen]);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  const socialLinks = [
-    {
-      href: "https://www.linkedin.com/in/suraj-adhikari-041667240/",
-      icon: faLinkedin,
-      text: "LinkedIn",
-    },
-    {
-      href: "https://github.com/surajadhikari01",
-      icon: faGithub,
-      text: "GitHub",
-    },
-    { href: "https://twitter.com/savvyaye", icon: faTwitter, text: "Twitter" },
-    {
-      href: "https://www.instagram.com/xdzc0",
-      icon: faInstagram,
-      text: "Instagram",
-    },
-  ];
-
-  const sectionIcons = {
-    home: faHome,
-    about: faUser,
-    skills: faLaptopCode,
-    projects: faBriefcase,
-    contact: faEnvelope,
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const renderLinkText = (text, id) => (
@@ -133,53 +134,42 @@ function Navbar({ isMenuOpen, setIsMenuOpen }) {
       {activeSection === id && (
         <motion.span
           layoutId="activeSection"
-          initial={{ scale: 0.8, borderRadius: "50%" }} // Start small and rounded
-          animate={{ scale: 1, borderRadius: "0%" }} // Expand to full width and no rounded corners
+          initial={{ scale: 0.8, borderRadius: "50%" }}
+          animate={{ scale: 1, borderRadius: "0%" }}
           transition={{
             duration: 0.5,
             ease: "easeInOut",
             type: "spring",
-            stiffness: 300, // Gives a bouncy effect like water drop
-            damping: 20, // Controls the oscillation to prevent too much bouncing
+            stiffness: 300,
+            damping: 20,
           }}
         />
       )}
     </motion.div>
   );
+
+  // Consolidated effect to manage scrolling on mobile based on menu state and window resize
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        // Enable scrolling on larger screens
-        document.body.style.overflow = "unset";
+      if (window.innerWidth < 768 && isMenuOpen) {
+        document.body.style.overflow = "hidden";
       } else {
-        // Disable scrolling on mobile if menu is open
-        document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
+        document.body.style.overflow = "unset";
       }
     };
 
-    // Initial check
     handleResize();
-
-    // Add event listener
     window.addEventListener("resize", handleResize);
-
-    // Cleanup event listener
     return () => {
       window.removeEventListener("resize", handleResize);
-      document.body.style.overflow = "unset"; // Reset on component unmount
+      document.body.style.overflow = "unset";
     };
-  }, [isMenuOpen]);
-
-  useEffect(() => {
-    if (window.innerWidth < 768) {
-      document.body.style.overflow = isMenuOpen ? "hidden" : "unset";
-    }
   }, [isMenuOpen]);
 
   return (
     <nav
       className={`fixed flex flex-col top-0 left-0 z-50 h-full bg-gray-900 text-white overflow-hidden transition-all duration-300 
-      ${isMenuOpen ? "md:w-[15rem] w-full " : "w-20"}`}
+      ${isMenuOpen ? "md:w-[15rem] w-full" : "w-16"}`}
     >
       <div className="mx-auto my-8 h-screen flex flex-col justify-between">
         <div>
@@ -189,7 +179,7 @@ function Navbar({ isMenuOpen, setIsMenuOpen }) {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
           >
-            SA
+            <FontAwesomeIcon icon={faCode} />
           </motion.a>
           <motion.div
             className="block cursor-pointer p-4 mb-8"

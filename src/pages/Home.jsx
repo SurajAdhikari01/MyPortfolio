@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import {
   motion,
   useViewportScroll,
@@ -39,9 +45,11 @@ import {
 import axios from "axios";
 import { GraphQLClient, gql } from "graphql-request";
 
+// GitHub constants
 const GITHUB_USERNAME = "surajadhikari01";
 const GITHUB_TOKEN = import.meta.env.VITE_GITHUB_TOKEN;
 
+// Custom hook using IntersectionObserver with memoized options
 const useIntersectionObserver = (options) => {
   const [isIntersecting, setIntersecting] = useState(false);
   const ref = useRef();
@@ -50,21 +58,18 @@ const useIntersectionObserver = (options) => {
     const observer = new IntersectionObserver(([entry]) => {
       setIntersecting(entry.isIntersecting);
     }, options);
-
     if (ref.current) {
       observer.observe(ref.current);
     }
-
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current);
-      }
+      if (ref.current) observer.unobserve(ref.current);
     };
   }, [ref, options]);
 
   return [ref, isIntersecting];
 };
 
+// Custom hook for mouse-based parallax effect
 const useMouseParallax = (depth = 10) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
@@ -80,14 +85,13 @@ const useMouseParallax = (depth = 10) => {
 
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [handleMouseMove]);
 
   return position;
 };
 
+// AnimatedNumber component with spring animation
 const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(0);
   const springValue = useSpring(displayValue);
@@ -106,7 +110,8 @@ const AnimatedNumber = ({ value }) => {
   return <span>{displayValue}</span>;
 };
 
-const CodeSnippet = ({ code, language }) => {
+// Memoized CodeSnippet to prevent unnecessary re-renders
+const CodeSnippet = React.memo(({ code, language }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -125,15 +130,15 @@ const CodeSnippet = ({ code, language }) => {
       )}
     </pre>
   );
-};
+});
 
+// Fetch GitHub contribution activity using GraphQL
 const fetchGitHubContributionActivity = async (username, token) => {
   const client = new GraphQLClient("https://api.github.com/graphql", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
-
   const CONTRIBUTION_QUERY = gql`
     query ($username: String!) {
       user(login: $username) {
@@ -150,7 +155,6 @@ const fetchGitHubContributionActivity = async (username, token) => {
       }
     }
   `;
-
   try {
     const data = await client.request(CONTRIBUTION_QUERY, { username });
     return data.user.contributionsCollection.contributionCalendar.weeks
@@ -165,6 +169,7 @@ const fetchGitHubContributionActivity = async (username, token) => {
   }
 };
 
+// Custom hook to fetch GitHub user data, repos, and languages
 const useGitHubData = (username) => {
   const [userData, setUserData] = useState(null);
   const [repos, setRepos] = useState([]);
@@ -186,9 +191,7 @@ const useGitHubData = (username) => {
             }
           ),
         ]);
-
         const reposData = reposResponse.data;
-
         const reposWithLanguages = await Promise.all(
           reposData.map(async (repo) => {
             const languagesResponse = await axios.get(repo.languages_url, {
@@ -200,14 +203,12 @@ const useGitHubData = (username) => {
             };
           })
         );
-
         const languageTotals = reposWithLanguages.reduce((acc, repo) => {
           Object.entries(repo.languages).forEach(([lang, bytes]) => {
             acc[lang] = (acc[lang] || 0) + bytes;
           });
           return acc;
         }, {});
-
         setUserData(userResponse.data);
         setRepos(reposWithLanguages);
         setLanguages(languageTotals);
@@ -217,7 +218,6 @@ const useGitHubData = (username) => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [username]);
 
@@ -233,10 +233,22 @@ const COLORS = [
   "#82ca9d",
 ];
 
+// Throttle function to reduce scroll event calls
+const throttle = (func, delay) => {
+  let lastCall = 0;
+  return (...args) => {
+    const now = new Date().getTime();
+    if (now - lastCall < delay) return;
+    lastCall = now;
+    func(...args);
+  };
+};
+
 const Home = ({ isMenuOpen }) => {
   const [scrollY, setScrollY] = useState(0);
   const [activeProject, setActiveProject] = useState(null);
   const [theme, setTheme] = useState("dark");
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const { scrollYProgress } = useViewportScroll();
   const yRange = useTransform(scrollYProgress, [0, 1], [0, 100]);
   const pathLength = useSpring(yRange, { stiffness: 400, damping: 90 });
@@ -246,11 +258,18 @@ const Home = ({ isMenuOpen }) => {
   const { userData, repos, languages, loading, error } =
     useGitHubData(GITHUB_USERNAME);
 
+  // Throttled scroll handler
+  const handleScroll = useCallback(
+    throttle(() => {
+      setScrollY(window.scrollY);
+    }, 100),
+    []
+  );
+
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [handleScroll]);
 
   useEffect(() => {
     const fetchActivity = async () => {
@@ -275,19 +294,29 @@ const Home = ({ isMenuOpen }) => {
     visible: { opacity: 1, y: 0 },
   };
 
-  const skillDistribution = Object.entries(languages)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 6)
-    .map(([name, value]) => ({ name, value }));
-
-  const totalBytes = Object.values(languages).reduce(
-    (sum, bytes) => sum + bytes,
-    0
+  // Memoize computed values
+  const totalBytes = useMemo(
+    () => Object.values(languages).reduce((sum, bytes) => sum + bytes, 0),
+    [languages]
   );
-  const skills = Object.entries(languages)
-    .map(([name, bytes]) => ({ name, level: (bytes / totalBytes) * 100 }))
-    .sort((a, b) => b.level - a.level)
-    .slice(0, 8);
+
+  const skillDistribution = useMemo(
+    () =>
+      Object.entries(languages)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 6)
+        .map(([name, value]) => ({ name, value })),
+    [languages]
+  );
+
+  const skills = useMemo(
+    () =>
+      Object.entries(languages)
+        .map(([name, bytes]) => ({ name, level: (bytes / totalBytes) * 100 }))
+        .sort((a, b) => b.level - a.level)
+        .slice(0, 8),
+    [languages, totalBytes]
+  );
 
   return (
     <motion.div
@@ -298,7 +327,7 @@ const Home = ({ isMenuOpen }) => {
       } min-h-screen relative`}
       initial={false}
       animate={{
-        marginLeft: isMenuOpen ? "16rem " : "5rem",
+        marginLeft: isMenuOpen ? "16rem" : "5rem",
         width: isMenuOpen ? "calc(100% - 16rem)" : "calc(100% - 5rem)",
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -318,12 +347,20 @@ const Home = ({ isMenuOpen }) => {
           }}
         >
           <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
-            <div className="flex-shrink-0">
+            <div className="flex-shrink-0 relative w-40 h-40">
+              {/* Placeholder with pulse animation until the image loads */}
+              {!isImageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-700 rounded-full animate-pulse" />
+              )}
               {userData && (
-                <img
+                <motion.img
                   src={userData.avatar_url}
                   alt={userData.name}
-                  className="rounded-full w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 object-cover"
+                  loading="lazy"
+                  animate={isImageLoaded ? { opacity: 1, scale: 1 } : {}}
+                  transition={{ duration: 0.8 }}
+                  onLoad={() => setIsImageLoaded(true)}
+                  className="rounded-full w-40 h-40 object-cover"
                 />
               )}
             </div>
@@ -345,7 +382,10 @@ const Home = ({ isMenuOpen }) => {
                     link: "https://www.linkedin.com/in/suraj-adhikari-041667240/",
                   },
                   { icon: faTwitter, link: "https://twitter.com/savvyaye" },
-                  { icon: faMedium, link: "https://medium.com/@yourusername" },
+                  {
+                    icon: faMedium,
+                    link: "https://medium.com/@yourusername",
+                  },
                   {
                     icon: faStackOverflow,
                     link: "https://stackoverflow.com/users/youruserid",
@@ -587,33 +627,6 @@ const Home = ({ isMenuOpen }) => {
           </ResponsiveContainer>
         </div>
       </motion.section>
-
-      {/* {<motion.section
-        className="container mx-auto py-20 px-4"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <h2 className="text-4xl font-semibold mb-12 text-center">
-          Code Showcase
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <CodeSnippet
-            language="javascript"
-            code={`
-// Custom React Hook for API calls
-Ignore this i will fill this later
-            `}
-          />
-          <CodeSnippet
-            language="python"
-            code={`
-# AI-powered text summarization
-ignore this i will fill this later on
-            `}
-          />
-        </div>
-      </motion.section>} */}
 
       <footer className="bg-gray-900 py-8">
         <div className="container mx-auto px-4">
