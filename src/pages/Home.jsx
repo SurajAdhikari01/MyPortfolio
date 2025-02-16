@@ -10,7 +10,6 @@ import {
   useViewportScroll,
   useTransform,
   useSpring,
-  AnimatePresence,
 } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -96,6 +95,7 @@ const AnimatedNumber = ({ value }) => {
   const [displayValue, setDisplayValue] = useState(0);
   const springValue = useSpring(displayValue);
 
+  // Update the spring value when the prop changes
   useEffect(() => {
     springValue.set(value);
   }, [value, springValue]);
@@ -283,6 +283,9 @@ const Home = ({ isMenuOpen }) => {
   }, []);
 
   const [heroRef, heroInView] = useIntersectionObserver({ threshold: 0.1 });
+  // New intersection observers for stats and skills sections:
+  const [statsRef, statsInView] = useIntersectionObserver({ threshold: 0.1 });
+  const [skillsRef, skillsInView] = useIntersectionObserver({ threshold: 0.1 });
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -429,7 +432,9 @@ const Home = ({ isMenuOpen }) => {
           problems and creating innovative solutions that push the boundaries of
           what's possible in tech.
         </motion.p>
+        {/* Stats Section wrapped with IntersectionObserver */}
         <motion.div
+          ref={statsRef}
           className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center mt-16"
           variants={itemVariants}
         >
@@ -468,7 +473,8 @@ const Home = ({ isMenuOpen }) => {
                 className="text-4xl mb-4 text-blue-400"
               />
               <p className="text-lg">
-                <AnimatedNumber value={item.value} />
+                {/* Only animate to the actual value when the stats section is in view */}
+                <AnimatedNumber value={statsInView ? item.value : 0} />
                 {typeof item.value === "number" && item.value > 100 ? "+" : ""}
               </p>
               <p className="text-sm text-gray-400">{item.text}</p>
@@ -485,7 +491,10 @@ const Home = ({ isMenuOpen }) => {
         id="skills"
       >
         <h2 className="text-4xl font-semibold mb-12 text-center">Skills</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        <div
+          ref={skillsRef}
+          className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto"
+        >
           {skills.map((skill, index) => (
             <motion.div
               key={index}
@@ -498,7 +507,9 @@ const Home = ({ isMenuOpen }) => {
                 <motion.div
                   className="h-full rounded-full bg-gradient-to-r from-blue-400 to-purple-600"
                   initial={{ width: 0 }}
-                  animate={{ width: `${skill.level}%` }}
+                  animate={
+                    skillsInView ? { width: `${skill.level}%` } : { width: 0 }
+                  }
                   transition={{ duration: 1, delay: index * 0.1 }}
                 />
               </div>
